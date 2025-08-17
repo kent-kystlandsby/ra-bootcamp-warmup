@@ -1,32 +1,30 @@
-refusal_data <- readRDS("/Users/ki/Desktop/RABC事前課題作業/data/original/refusal_data.obj")
-n_of_students <- readRDS("/Users/ki/Desktop/RABC事前課題作業/data/original/n_of_students.obj")
+refusal_data <- readRDS("/Users/ki/Desktop/RABC事前課題_1/data/original/refusal_data.obj")
+n_of_students <- readRDS("/Users/ki/Desktop/RABC事前課題_1/data/original/n_of_students.obj")
 
-#delete blank
+#blankを削除
 for(i in 1:10){
   refusal_data[[i]] <-
   refusal_data[[i]] %>% 
     select(!blank)
 }
 
-#chr to numeric : refusal numbers
+#refusal numbersの型変更
 for(i in 1:10){
   refusal_data[[i]]$`refusal numbers` <-
     refusal_data[[i]]$`refusal numbers` %>% 
     as.numeric()
 }
 
-#add year
+#year列の追加
 for(i in 1:10){
   refusal_data[[i]] <-
     refusal_data[[i]] %>% 
     mutate(year = 2012 + i)
 }
 
-#combine dataframes
+#結合
 combined_refusal <-
   refusal_data %>% bind_rows()
-
-bind_rows(.id = ) 
 
 n_of_students
 
@@ -38,7 +36,7 @@ joined_data <-
   joined_data %>% 
   mutate(refusal_rate = `refusal numbers`/`number of students`)
 
-saveRDS(joined_data, file = "/Users/ki/Desktop/RABC事前課題作業/data/cleaned/refusal_joined.obj")
+saveRDS(joined_data, file = "/Users/ki/Desktop/RABC事前課題_1/data/cleaned/refusal_joined.obj")
 
 
 

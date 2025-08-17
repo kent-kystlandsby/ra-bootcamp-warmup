@@ -1,0 +1,42 @@
+---
+title: "analyze"
+output: html_document
+---
+library(tidyverse)
+library(ggplot2)
+
+joined_data <- readRDS("/Users/ki/Desktop/RABC事前課題_1/data/cleaned/refusal_joined.obj")
+
+refusal_sum <- 
+  joined_data %>% group_by(year) %>% summarise(total_refusals = sum(`refusal numbers`))
+
+#refusal_sum table 図1
+refusal_sum %>% View()
+
+#refusal_sum barchart 図1
+refusal_sum %>% ggplot(aes(x = year, y = total_refusals)) + geom_col()
+
+#refusal_rate_total line chart 図2
+refusal_rate_total <- 
+  joined_data %>% group_by(year) %>% summarise(total_refusal_rate = mean(refusal_rate))
+
+refusal_rate_total %>% ggplot(aes(x = year, y = total_refusal_rate)) +
+  geom_line() + geom_point() + geom_text(aes(label = round(total_refusal_rate, 2)), vjust = -1) + scale_x_continuous(breaks = refusal_rate_total$year)
+
+#2軸図3
+refusal_total <- refusal_rate_total %>% left_join(refusal_sum, by = 'year')
+refusal_total_adjusted <- refusal_total %>% mutate(total_refusal_rate = total_refusal_rate*2500000)
+
+refusal_total_adjusted %>% ggplot(aes(x = year), color = "blue") +
+  geom_col(aes(y = total_refusals)) + geom_line(aes(y = total_refusal_rate), color  = "red") + geom_point(aes(y = total_refusal_rate)) + scale_x_continuous(breaks = refusal_total_adjusted$year) + scale_y_continuous(sec.axis = sec_axis(~./2500000, name="refusal_rate_total"), name="refusal_number")
+
+#図4 histgram
+rate_mean <- joined_data %>% filter(year == 2022) %>% pull(refusal_rate) %>%  mean()
+
+joined_data  %>% filter(year == 2022) %>% ggplot(aes(x = refusal_rate)) + geom_histogram() + geom_vline(aes (xintercept = rate_mean), linetype = "dashed", color = "red")
+
+#図5
+joined_data_highlight <- joined_data %>%
+  mutate(highlight = ifelse(prefecture == "長野", 1, 0))
+
+joined_data_highlight  %>% filter(year == 2022) %>% mutate(prefecture = fct_reorder(prefecture, refusal_rate)) %>% ggplot(aes(y = refusal_rate, x = prefecture, fill = factor(highlight))) + geom_col() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_fill_manual(values = c("1" = "pink", "0" = "grey"))
